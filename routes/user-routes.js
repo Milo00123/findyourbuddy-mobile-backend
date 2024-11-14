@@ -105,3 +105,5 @@ router.put('/:id', upload.single('profile_image'), async (req, res) => {
         res.status(400).json({ message: `Error updating user: ${err.message}` });
     }
 });
+
+module.exports = router;

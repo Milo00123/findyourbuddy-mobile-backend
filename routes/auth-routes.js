@@ -48,7 +48,7 @@ router.post('/login/apple', async (req, res) => {
     const { token } = req.body;
 
     try {
-        // Verify Apple token (Apple public key needed)
+        // Verify apple token (Apple public key needed)
         const decoded = jwt.verify(token, process.env.APPLE_PUBLIC_KEY, {
             algorithms: ['RS256'],
         });

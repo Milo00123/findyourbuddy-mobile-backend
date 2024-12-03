@@ -13,11 +13,15 @@ app.use(
     })
 );
 
+
+
 const PORT = process.env.PORT || 8080;
 const userRoutes = require('./routes/user-routes.js');
 const authRoutes = require('./routes/auth-routes.js');
 const postRoutes = require('./routes/post-routes.js');
+const variables = require('./routes/variables.js');
 app.use('/posts', postRoutes)
+app.use('/config', variables)
 app.use('/', userRoutes)
 
 app.listen(PORT, () => {

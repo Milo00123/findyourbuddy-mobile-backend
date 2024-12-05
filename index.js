@@ -22,6 +22,7 @@ const postRoutes = require('./routes/post-routes.js');
 const variables = require('./routes/variables.js');
 app.use('/posts', postRoutes)
 app.use('/config', variables)
+app.use('/auth', authRoutes);
 app.use('/', userRoutes)
 
 app.listen(PORT, () => {

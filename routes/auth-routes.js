@@ -5,23 +5,32 @@ const jwt = require('jsonwebtoken');
 const db = require('../db'); 
 const router = express.Router();
 
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+const googleClient = new OAuth2Client();
 
-//google
+// Google login route
 router.post('/login/google', async (req, res) => {
     const { token } = req.body;
-
+    console.log('Platform header:', req.headers['platform']);
     try {
+        const clientId = req.headers['platform'] === 'ios'
+            ? process.env.IOS_CLIENT_ID
+            : req.headers['platform'] === 'android'
+            ? process.env.ANDROID_CLIENT_ID
+            : process.env.WEB_CLIENT_ID;
+            console.log('Selected client ID:', clientId);
+            console.log('IOS_CLIENT_ID:', process.env.IOS_CLIENT_ID);
+
         const ticket = await googleClient.verifyIdToken({
             idToken: token,
-            audience: process.env.GOOGLE_CLIENT_ID,
+            audience: clientId, 
+            
         });
+
         const payload = ticket.getPayload();
-        
         const userEmail = payload.email;
-        const providerId = payload.sub; 
-        
+        const providerId = payload.sub;
+
         let user = await db.query('SELECT * FROM users WHERE provider_id = $1', [providerId]);
         if (user.rows.length === 0) {
             const insertResult = await db.query(
@@ -32,6 +41,8 @@ router.post('/login/google', async (req, res) => {
         } else {
             user = user.rows[0];
         }
+
+        // Set the user session
         req.session.userId = user.id;
         req.session.userEmail = user.email;
         req.session.providerId = user.provider_id;
@@ -42,13 +53,11 @@ router.post('/login/google', async (req, res) => {
     }
 });
 
-
 //apple
 router.post('/login/apple', async (req, res) => {
     const { token } = req.body;
 
     try {
-        // Verify apple token (Apple public key needed)
         const decoded = jwt.verify(token, process.env.APPLE_PUBLIC_KEY, {
             algorithms: ['RS256'],
         });
